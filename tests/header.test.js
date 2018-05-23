@@ -1,24 +1,18 @@
-const puppeteer = require('puppeteer');
+const Page = require('./helpers/page');
 
-const sessionFactory = require('./factories/session-factory');
-const userFactory = require('./factories/user-factory');
-
-let browser, page;
+let page;
 
 beforeEach(async () => {
-  browser = await puppeteer.launch({
-    headless: false // we want to see the graphical interface
-  });
-  page = await browser.newPage();
+  page = await Page.build();
   await page.goto('localhost:3000');
 });
 
 afterEach(async () => {
-  await browser.close();
+  await page.close();
 });
 
 test('the header has the correct test', async () => {
-  const text = await page.$eval('a.brand-logo', el => el.innerHTML);
+  const text = await page.getContentsOf('a.brand-logo');
 
   expect(text).toEqual('Blogster');
 });
@@ -32,19 +26,10 @@ test('clicking loging start oauth flow', async () => {
 });
 
 test('When signed in, shows logout button', async () => {
-  const user = await userFactory();
-  const { session, sig } = sessionFactory(user);
-
-  // set up a cookie in the Chromium instance
-  await page.setCookie({ name: 'session', value: session });
-  await page.setCookie({ name: 'session.sig', value: sig });
-  // refresh the page, simulate logging in
-  await page.goto('localhost:3000');
-  // otherwise the test will fail becaause it goes very quickly
-  await page.waitFor('a[href="/auth/logout"]');
+  await page.login();
 
   // get the Logout button
-  const text = await page.$eval('a[href="/auth/logout"]', el => el.innerHTML);
+  const text = await page.getContentsOf('a[href="/auth/logout"]');
 
   expect(text).toEqual('Logout');
 });
