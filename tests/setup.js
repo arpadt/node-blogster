@@ -1,3 +1,5 @@
+jest.setTimeout(30000); // how much should it wait before failing the test
+
 require('../models/User'); // execute the mongoose context when Jest starts
 
 const mongoose = require('mongoose');

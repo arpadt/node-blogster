@@ -35,7 +35,8 @@ class CustomPage {
     await this.page.setCookie({ name: 'session', value: session });
     await this.page.setCookie({ name: 'session.sig', value: sig });
     // refresh the page, simulate logging in
-    await this.page.goto('localhost:3000');
+    // we land on the blog page after logging in
+    await this.page.goto('localhost:3000/blogs');
     // otherwise the test will fail becaause it goes very quickly
     await this.page.waitFor('a[href="/auth/logout"]');
   }
