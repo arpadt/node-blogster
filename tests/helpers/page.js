@@ -45,6 +45,45 @@ class CustomPage {
   async getContentsOf(selector) {
     return this.page.$eval(selector, el => el.innerHTML);
   }
+
+  // automate GET request
+  get(path) {
+    return this.page.evaluate((_path) => {
+      // page.evaluate turns everything into a string, so 'path' won't be available
+      // as a closure scope value, so we need to pass it as an argument to evaluate()
+      // and the pageFunction (_path === path)
+      return fetch(_path, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json());
+    }, path);
+  }
+
+  // automate POST request
+  post(path, data) {
+    return this.page.evaluate((_path, _data) => {
+      return fetch(_path, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(_data)
+      }).then(res => res.json());
+    }, path, data);
+  }
+
+  // perfomr request
+  execRequests(actions) {
+    // array of promises, need to resolve them
+    return Promise.all(actions.map(
+      ({ method, path, data }) => {
+      return this[method](path, data);
+    }));
+  }
 }
 
 module.exports = CustomPage;
