@@ -1,0 +1,26 @@
+language: node_js
+node_js:
+  - "8"
+dist: trusty
+services:
+  - mongodb
+  - redis-server
+env:
+  - NODE_ENV=ci
+  - PORT=3000
+cache:
+  # speed up build time on travis by caching
+  directories:
+    - node_modules
+    - client/node_modules
+install:
+  - npm install
+# specific to this project
+  - npm run build
+script:
+# run the command in background mode (osx and linux only)
+# nohup: no hang up; keeps the process running even if the terminal is closed
+  - nohup npm run start &
+# add a pause for the server to start before running tests
+  - sleep 3
+  - npm run test
