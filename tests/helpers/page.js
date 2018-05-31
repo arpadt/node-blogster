@@ -7,7 +7,9 @@ class CustomPage {
   static async build() {
     // generates a new custom page and combines the two together
     const browser = await puppeteer.launch({
-      headless: false
+      headless: true,
+      // decrease the amount of time in testing on travis
+      args: ['--no-sandbox']
     });
 
     const page = await browser.newPage();
@@ -36,7 +38,8 @@ class CustomPage {
     await this.page.setCookie({ name: 'session.sig', value: sig });
     // refresh the page, simulate logging in
     // we land on the blog page after logging in
-    await this.page.goto('localhost:3000/blogs');
+    // http:// needed for travis
+    await this.page.goto('http://localhost:3000/blogs');
     // otherwise the test will fail becaause it goes very quickly
     await this.page.waitFor('a[href="/auth/logout"]');
   }
